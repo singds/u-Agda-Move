@@ -181,7 +181,6 @@ data HasType M where
     TselX :
           {s : Fin Ns}
           {j : Fin Nsf}
-        -- → (ht : HasType M Γ1 (var x) (Tst (sId M s)) Γ2) -- option 2
         → (htx : HasTypeX Γ1 x (Tst (sId M s)) Γ2)
         → (nLin : ¬ IsLinear (V.lookup (fieldsT M s) j))
         --------------------

@@ -122,7 +122,6 @@ data _∋_⇒v_ : Fin Nm → Vec Term n → Vec Term n → Set
 
 -- When a term can do a step.
 data _∋_⇒_ where
-
     Elet :
           (ev : M ∋ t1 ⇒ t1')
         --------------------
@@ -180,17 +179,17 @@ data _∋_⇒_ where
         → M ∋ (exec M2 t) ⇒ (exec M2 t')
 
     Eexecuted :
-          Value t
+          (v : Value t)
         --------------------
         → M ∋ (exec M2 t) ⇒ t
 
     Eif :
-          M ∋ t1 ⇒ t1'
+          (ev : M ∋ t1 ⇒ t1')
         --------------------
         → M ∋ (if t1 then t2 else t3) ⇒ (if t1' then t2 else t3)
 
-    Eiftrue :
-          {g : ℕ} → (nz : ¬ g ≡ 0)
+    Eiftrue : {g : ℕ}
+        → (nz : ¬ g ≡ 0)
         --------------------
         → M ∋ (if (num g) then t2 else t3) ⇒ t2
     
