@@ -10,45 +10,50 @@ open Syntax Nm Ns Nf Nsf Nfa
 open import project.Utility Nm Ns Nf Nsf Nfa P
 
 
+-- A base environment is a vector of types.
 Env = Vec Type
 
+-- A Usage is a type T with a marker, either ∘ or •.
+-- T ∘ and T • are two elements of type Usage T.
 data Usage : Type → Set where
     _∘ : (T : Type) → Usage T
     _• : (T : Type) → Usage T
 
 data UEnv : {l : ℕ} → Env l → Set where
-    []  : UEnv V.[]
+    []   : UEnv V.[]
     _u∷_ : {l : ℕ} {T : Type} {Δ : Env l}
         → Usage T → UEnv Δ
         → UEnv (T V.∷ Δ)
 
 infixr 5 _u∷_
 
-uLookup : {l : ℕ} {Δ : Env l} → (i : Fin l) → UEnv Δ → Usage (V.lookup Δ i)
-uLookup F.zero (T u∷ Γ) = T
+----------------------------------------------------- MANIPULATION FUNC FOR UENV
+uLookup : {l : ℕ} {Δ : Env l} →
+    (i : Fin l) → UEnv Δ → Usage (V.lookup Δ i)
+uLookup F.zero    (T u∷ Γ) = T
 uLookup (F.suc i) (T u∷ Γ) = uLookup i Γ
 
-_u++_ : {l1 l2 : ℕ} {Δ1 : Env l1} {Δ2 : Env l2} → UEnv Δ1 → UEnv Δ2 → UEnv (Δ1 V.++ Δ2)
+_u++_ : {l1 l2 : ℕ} {Δ1 : Env l1} {Δ2 : Env l2} →
+    UEnv Δ1 → UEnv Δ2 → UEnv (Δ1 V.++ Δ2)
 [] u++ ys        = ys
 (x u∷ xs) u++ ys = x u∷ (xs u++ ys)
 
-uInsert : {l : ℕ} {Δ : Env l} → {T : Type} → UEnv Δ → (i : Fin (suc l)) → Usage T → UEnv (V.insert Δ i T)
-uInsert Γ F.zero U = U u∷ Γ
+uInsert : {l : ℕ} {Δ : Env l} → {T : Type} →
+    UEnv Δ → (i : Fin (suc l)) → Usage T → UEnv (V.insert Δ i T)
+uInsert Γ         F.zero    U  = U u∷ Γ
 uInsert (U1 u∷ Γ) (F.suc i) U2 = U1 u∷ uInsert Γ i U2
 
-uRemove : {l : ℕ} {Δ : Env (suc l)} → UEnv Δ → (i : Fin (suc l)) → UEnv (V.remove Δ i)
+uRemove : {l : ℕ} {Δ : Env (suc l)} →
+    UEnv Δ → (i : Fin (suc l)) → UEnv (V.remove Δ i)
 uRemove (_ u∷ Γ)          F.zero    = Γ
 uRemove (U1 u∷ (U2 u∷ Γ)) (F.suc i) = U1 u∷ uRemove (U2 u∷ Γ) i
 
-uUpdateAt : {l : ℕ} {Δ : Env l} → (i : Fin l) → ({T : Type} → Usage T → Usage T) → UEnv Δ → UEnv Δ
-uUpdateAt F.zero f (U u∷ Γ) = f U u∷ Γ
-uUpdateAt (F.suc i) f (U u∷ Γ) = U u∷ uUpdateAt i f Γ
------
--- uUpdateAt {Δ = Δ} i f (U u∷ Γ) rewrite Eq.sym (VP.insert-remove Δ i)
---     = uInsert (uRemove (U u∷ Γ) i) i (f (uLookup i (U u∷ Γ)))
------
--- uUpdateAt F.zero f (U u∷ Γ) = f U u∷ Γ
--- uUpdateAt (F.suc i) f (U u∷ Γ) = U u∷ uUpdateAt i f Γ
+uUpdateAt : {l : ℕ} {Δ : Env l} →
+    (i : Fin l) → ({T : Type} → Usage T → Usage T) → UEnv Δ → UEnv Δ
+uUpdateAt F.zero    f (U u∷ Γ) = f U u∷ Γ
+uUpdateAt (F.suc i) f (U u∷ Γ) = U   u∷ uUpdateAt i f Γ
+
+
 
 private
     variable
@@ -59,21 +64,21 @@ private
         t t1 t2 t3  : Term
         n x         : ℕ
 
-
+-- IsLinear T: "The type T is linear."
 data IsLinear : Type → Set where
     lin :
-          {m : Fin Nm}
-        → {s : Fin Ns}
+          {m : Fin Nm} {s : Fin Ns}
         → isLin m s ≡ true
         → IsLinear (Tst (sId m s))
 
-
+-- Computable function to check if a type is linear
 tyIsLin : (T : Type) → Dec (IsLinear T)
 tyIsLin Tint                 = no (λ { () })
 tyIsLin (Tst (sId m s)) with isLin m s BP.≟ true
 tyIsLin (Tst (sId m s)) | no ¬p = no λ { (lin {.m} {.s} pl) → ¬p pl }
 tyIsLin (Tst (sId m s)) | yes p = yes (lin p)
 
+-- Tint is not linear
 ¬linTint : ¬ IsLinear Tint
 ¬linTint ()
 
@@ -83,19 +88,19 @@ data HasTypeV (M : Fin Nm) : UEnv Δ → Vec Term n → Vec Type n → UEnv Δ �
 data HasTypeI (M : Fin Nm) : UEnv Δ → Vec Type n → Term → Type → UEnv Δ → Set
 
 data HasTypeX where
-    Xz  :
+    Xz  : -- Lookup of a variable with normal type
           (nLin : ¬ IsLinear T)
         --------------------
         → HasTypeX ((T ∘) u∷ Γ) 0 T ((T ∘) u∷ Γ)
+        --                              ^----------- note the ∘
 
-    -- Lookup of a linear variable with linear type
-    XzL :
+    XzL : -- Lookup of a linear variable with linear type
           (yLin : IsLinear T)
         --------------------
         → HasTypeX ((T ∘) u∷ Γ) 0 T ((T •) u∷ Γ)
+        --                              ^----------- note the •
 
-    Xs  :
-          {U : Usage T2}
+    Xs  : {U : Usage T2}
         → (htx : HasTypeX Γ1 x T Γ2)
         --------------------
         → HasTypeX (U u∷ Γ1) (suc x) T (U u∷ Γ2)
@@ -106,18 +111,14 @@ htxIsTy :
     {i : Fin l}
     → HasTypeX Γ1 (toℕ i) T Γ2
     → T ≡ V.lookup Δ i
-htxIsTy {i = Fin.zero} (Xz  nLin) = refl
-htxIsTy {i = Fin.zero} (XzL yLin) = refl
-htxIsTy {i = Fin.suc i} (Xs htx) = htxIsTy htx
+htxIsTy {i = Fin.zero}  (Xz  nLin) = refl
+htxIsTy {i = Fin.zero}  (XzL yLin) = refl
+htxIsTy {i = Fin.suc i} (Xs htx)   = htxIsTy htx
 
 
-{-
-HasType M Γ1 t T Γ2
-    means:
-    In env. Γ1, term t has type T,
-    and Γ2 is the env. Γ1 with the linear variables used by t marked as used.
-    M is the module executing the term.
--}
+-- HasType M Γ1 t T Γ2: "In env. Γ1, term t has type T,
+--  and Γ2 is the env. Γ1 with the linear variables used by t marked as used.
+--  M is the module executing the term."
 data HasType M where
     Tnum :
         --------------------
@@ -202,13 +203,9 @@ data HasType M where
         → HasType M Γ1 (pub t) Tint Γ2
 
 
-{-
-HasTypeI M Γ1 Ts t T Γ2
-    means:
-    In env. Γ1 extended with the Vec of types Ts, term t has type T,
-    and Γ2 is the env. Γ1 with the linear variables used by t marked as used.
-    M is the module executing the term.
--}
+-- HasTypeI M Γ1 Ts t T Γ2: "In env. Γ1 extended with the Vec of types Ts, term t has type T,
+--  and Γ2 is the env. Γ1 with the linear variables used by t marked as used.
+--  M is the module executing the term."
 data HasTypeI M where
     I[_] :
           (ht : HasType M Γ1 t T Γ2)
@@ -232,13 +229,7 @@ data HasTypeI M where
 infixr 5 _I∷_
 infixr 5 _I∷l_
 
-{-
-HasTypeV M Γ1 ts Ts Γ2
-    means:
-    In env. Γ1 the term ts[x] has type Ts[x],
-    
-    M is the module executing the term.
--}
+-- HasTypeV M Γ1 ts Ts Γ2: "In env. Γ1 the terms ts have types Ts with out context Γ2."
 data HasTypeV M where
     T[] :
         --------------------
@@ -255,12 +246,13 @@ data HasTypeV M where
 infixr 5 _T∷_
 
 
-
+-- WellFun M F: "The function F in module M is well formed."
 record WellFun (M : Fin Nm) (F : Fin Nf) : Set where
     constructor well
     field
         hti : HasTypeI M [] (argsT M F) (toRun (body M F)) (retT M F) []
 
+-- WellStr M S: "The struct S in module M is well formed."
 record WellStr (M : Fin Nm) (S : Fin Ns) : Set where
     constructor well
     field
@@ -268,6 +260,7 @@ record WellStr (M : Fin Nm) (S : Fin Ns) : Set where
             → (j : Fin Nsf)
             → ¬ IsLinear (V.lookup (fieldsT M S) j))
 
+-- WellMod M: "The module M is well formed."
 record WellMod (M : Fin Nm) : Set where
     field
         wf : (F : Fin Nf) → WellFun M F

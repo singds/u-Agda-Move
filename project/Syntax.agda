@@ -3,11 +3,11 @@ open import project.IncludeBase
 module project.Syntax (Nm Ns Nf Nsf Nfa : ℕ) where
 {-
 Module Parameters:
-    Nm   -- number of modules
-    Ns   -- number of structures for each module
-    Nf   -- number of functions for each module
-    Nsf  -- number of fields for each structure
-    Nfa  -- number of arguments for each function
+    Nm   -- # of modules
+    Ns   -- # of structures for each module
+    Nf   -- # of functions for each module
+    Nsf  -- # of fields for each structure
+    Nfa  -- # of arguments for each function
 -}
 
 private
@@ -26,11 +26,13 @@ record FunId : Set where
         m : Fin Nm
         f : Fin Nf
 
+-- K is the Set of resource identifiers.
 K : Set
 K = ℕ
 k0 = 0
 
 -- Language Terms
+-- The terms the programmer can use to write a program.
 data LTerm : Set where
     num_           : (n : ℕ) → LTerm                                 -- constant
     var_           : (x : ℕ) → LTerm                                 -- variable. x is a de Bruijn index
@@ -43,6 +45,7 @@ data LTerm : Set where
     pub_           : (t : LTerm) → LTerm                             -- publish t
 
 -- Runtime Terms
+-- LTerm + runtimes terms
 data Term : Set where
     num_           : (n : ℕ) → Term
     var_           : (x : ℕ) → Term
@@ -62,6 +65,8 @@ infixl 30 num_
 infix  20 Let_In_
 infix  20 unpack_In_
 
+-- Converts an LTerm to a Term. It is simply a mapping of the constructors.
+-- toRun because LTerm are the program source code while Term are the runtime terms.
 toRun : LTerm → Term
 toRun-vec : {n : ℕ} → Vec LTerm n → Vec Term n
 
@@ -78,24 +83,24 @@ toRun (pub t) = pub (toRun t)
 toRun-vec V.[] = V.[]
 toRun-vec (t V.∷ ts) = toRun t V.∷ toRun-vec ts
 
-
 data Type : Set where
     Tint : Type
-    Tst  : StrId → Type
+    Tst  : StrId → Type -- Every struct identifier is also a type
 
 record StrDef : Set where
     constructor strDef
     field
         isLin   : Bool -- true if the structure is a linear type
         fieldsT : Vec Type Nsf
-        -- The types of the fields of the struct. Field 0 has type fieldsT[0], etc.
+        -- The types of the fields of the struct.
+        -- Field 0 has type fieldsT[0], etc.
         -- Struct fields don't have names.
 
 record FunDef : Set where
     constructor funDef
     field
-        argsT : Vec Type Nfa
-        retT  : Type
+        argsT : Vec Type Nfa    -- Argument types
+        retT  : Type            -- Return type
         body  : LTerm
 
 record Module : Set where
@@ -110,11 +115,10 @@ record Program : Set where
         modDefs : Vec Module Nm
 
 
-
--- Definition of values.
--- Value t    means "Term t is a value".
+-- Definition of value; defines what terms are considered values.
+-- Value t: "Term t is a value".
+-- ValueV ts: "All the terms in ts are values".
 data Value : Term → Set
--- ValueV ts  means "All the terms in ts are values".
 data ValueV : {n : ℕ} → Vec Term n → Set
 
 data Value where
@@ -140,57 +144,78 @@ data ValueV where
 infixr 20 _V∷_
 
 
-vLookup : {n : ℕ} {ts : Vec Term n} → (i : Fin n) → ValueV ts → Value (V.lookup ts i)
-vLookup F.zero (v V∷ vs) = v
+vLookup : {n : ℕ} {ts : Vec Term n} →
+    (i : Fin n) → ValueV ts → Value (V.lookup ts i)
+vLookup F.zero    (v V∷ vs) = v
 vLookup (F.suc i) (v V∷ vs) = vLookup i vs
 
 
 data All  {p : Level} (P : Pred Term p) : Term → Set p
 data AllV {p : Level} (P : Pred Term p) : Vec Term n → Set p
 
+-- All P t: "The term t satisy P, and all its subterms satisy P recursively".
 data All P where
-    all-num    : {n : ℕ} → P (num n) → All P (num n)
-    all-var    : {x : ℕ} → P (var x) → All P (var x)
-    all-let    : {t1 t2 : Term} → P (Let t1 In t2) → All P t1 → All P t2 → All P (Let t1 In t2)
-    all-call   : {fid : FunId} {ts : Vec Term n} → P (call fid ts) → AllV P ts → All P (call fid ts)
-    all-if     : {t1 t2 t3 : Term} → P (if t1 then t2 else t3) → All P t1 → All P t2 → All P t3 → All P (if t1 then t2 else t3)
-    all-pack   : {sid : StrId} {ts : Vec Term n} → P (pack sid ts) → AllV P ts → All P (pack sid ts)
-    all-unpack : {t1 t2 : Term} → P (unpack t1 In t2) → All P t1 → All P t2 → All P (unpack t1 In t2)
-    all-·      : {t : Term} {j : Fin Nsf} → P (t · j) → All P t → All P (t · j)
-    all-pub    : {t : Term} → P (pub t) → All P t → All P (pub t)
-    all-struct : {k : K} {sid : StrId} {ts : Vec Term n} → P (struct k sid ts) → AllV P ts → All P (struct k sid ts)
-    all-exec   : {M2 : Fin Nm} {t : Term} → P (exec M2 t) → All P t → All P (exec M2 t)
+    all-num    : {n : ℕ}
+        → P (num n)
+        → All P (num n)
+    all-var    : {x : ℕ}
+        → P (var x)
+        → All P (var x)
+    all-let    : {t1 t2 : Term}
+        → P (Let t1 In t2)
+        → All P t1
+        → All P t2
+        → All P (Let t1 In t2)
+    all-call   : {fid : FunId} {ts : Vec Term n}
+        → P (call fid ts)
+        → AllV P ts
+        → All  P (call fid ts)
+    all-if     : {t1 t2 t3 : Term}
+        → P (if t1 then t2 else t3)
+        → All P t1
+        → All P t2
+        → All P t3
+        → All P (if t1 then t2 else t3)
+    all-pack   : {sid : StrId} {ts : Vec Term n}
+        → P (pack sid ts)
+        → AllV P ts
+        → All  P (pack sid ts)
+    all-unpack : {t1 t2 : Term}
+        → P (unpack t1 In t2)
+        → All P t1
+        → All P t2
+        → All P (unpack t1 In t2)
+    all-·      : {t : Term} {j : Fin Nsf}
+        → P (t · j)
+        → All P t
+        → All P (t · j)
+    all-pub    : {t : Term}
+        → P (pub t)
+        → All P t
+        → All P (pub t)
+    all-struct : {k : K} {sid : StrId} {ts : Vec Term n}
+        → P (struct k sid ts)
+        → AllV P ts
+        → All  P (struct k sid ts)
+    all-exec   : {M2 : Fin Nm} {t : Term}
+        → P (exec M2 t)
+        → All P t
+        → All P (exec M2 t)
 
 data AllV P where
     all-vec[]  : AllV P V.[]
-    all-vec∷   : {t : Term} {ts : Vec Term n} → All P t → AllV P ts → AllV P (t V.∷ ts)
+    all-vec∷   : {t : Term} {ts : Vec Term n}
+        → All  P t
+        → AllV P ts
+        → AllV P (t V.∷ ts)
 
-allLookup : {p : Level} {ts : Vec Term n} {P : Pred Term p} → (i : Fin n) → AllV P ts → All P (V.lookup ts i)
-allLookup F.zero (all-vec∷ a as) = a
+allLookup : {p : Level} {ts : Vec Term n} {P : Pred Term p} →
+    (i : Fin n) → AllV P ts → All P (V.lookup ts i)
+allLookup F.zero    (all-vec∷ a as) = a
 allLookup (F.suc i) (all-vec∷ a as) = allLookup i as
 
 
--- FREE VARIABLES
-fv    : Term → List ℕ
-fvVec : Vec Term n → List ℕ
-
-fv (num n) = L.[]
-fv (var x) = x L.∷ L.[]
-fv (Let t1 In t2) = (fv t1) L.++ (L.filter (λ x → x >? 0) (L.map (λ x → x - 1) (fv t2)))
-fv (call fid ts) = fvVec ts
-fv (if t1 then t2 else t3) = fv t1 L.++ fv t2 L.++ fv t3
-fv (pack sid ts) = fvVec ts
-fv (unpack t1 In t2) = fv t1 L.++ (L.filter (λ x → x >? 0) (L.map (λ x → x - Nsf) (fv t2)))
-fv (struct k sid ts) = fvVec ts
-fv (exec M t) = fv t
-fv (t · j) = fv t
-fv (pub t) = fv t
-
-fvVec V.[] = L.[]
-fvVec (t V.∷ ts) = fv t L.++ fvVec ts
-
-
-
+-------------------------------------------------------------- UTILITY FUNCTIONS
 _⨾ : {A : Set} → A → V.Vec A 1
 _⨾ x = x V.∷ V.[]
 
