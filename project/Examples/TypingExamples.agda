@@ -51,7 +51,7 @@ open import project.Typing Nm 2 1 1 1 p
 
 
 -- Two usage-environments Γ1, Γ2 depending on the same environment Δ
-Δ : Env 2;        Δ  = Tint ∷ CoinT ∷ []
+Δ : Env 2;    Δ  = Tint    ∷ CoinT    ∷ []
 Γ1 : UEnv Δ;  Γ1 = Tint • u∷ CoinT • u∷ []
 Γ2 : UEnv Δ;  Γ2 = Tint ∘ u∷ CoinT • u∷ []
 
@@ -223,4 +223,6 @@ wellTy-term1 = Tcall (Tpack (Tnum T∷ T[]) T∷ T[])
 
 -- wellTy-term9 : HasType M0 `[] term9 LinCoinT `[]
 -- wellTy-term9 = TletL (lin {#0} {#1} refl) (Tpack (Tnum T∷ T[])) (Tseq ¬linTint Tnum (TvarL (lin refl)))
- 
+
+
+(remove x Γ) = Γ
