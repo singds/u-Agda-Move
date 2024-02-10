@@ -19,9 +19,8 @@ private
 
 
 
--- Substitute all the occurences of variable j in t2 with the term t1.
+-- Substitute all the occurences of the variable j in t2 with the term t1.
 subst     : (j : ℕ) → (t1 : Term) → (t2 : Term) → Term
--- The same substitution as above, but on each term of the vector
 subst-vec : (j : ℕ) → (t1 : Term) → (ts : Vec Term n) → Vec Term n
 
 
@@ -39,15 +38,14 @@ subst j t1 (exec m t) = exec m t
 subst j t1 (t · q) = (subst j t1 t) · q
 subst j t1 (pub t) = pub (subst j t1 t)
 
--- Apply the substitution to a vector of terms
 subst-vec j t1 V.[] = V.[]
 subst-vec j t1 (t V.∷ ts) = (subst j t1 t) V.∷ (subst-vec j t1 ts)
 
 
 
 -- Shift operation (used to define substitution)
--- Used to increase by "d" (shift up) the free variables of a term.
-shift     : (d : ℕ) → (d : ℕ) → Term → Term
+-- Increase by "d" (shift up) the variable indices of a term that are >= 'c'.
+shift     : (d : ℕ) → (c : ℕ) → Term → Term
 shift-vec : (d : ℕ) → (c : ℕ) → (ts : Vec Term n) → Vec Term n
 
 shift d c (num n) = num n
@@ -69,12 +67,10 @@ shift-vec d c (t V.∷ ts) = (shift d c t) V.∷ (shift-vec d c ts)
 
 
 
--- Decrease by 1 all the de-Brujin that are < c that appear in t1.
+-- Decrease by 1 all the De-Bruijn that are < c that appear in t1.
 shift-back     : (c : ℕ) → (t1 : Term) → Term
--- The same shift as above but applied to each term of the vector
 shift-back-vec : (c : ℕ) → (ts : Vec Term n) → Vec Term n
 
--- Shift-back by 1 all the de-Brujin indexes of a term
 shift-back c (num n)              = num n
 shift-back c (var x) with x <? c 
 ... | yes p = var x
@@ -90,7 +86,6 @@ shift-back c (t · j)                  = (shift-back c t) · j
 shift-back c (pub t)                  = pub (shift-back c t)
 
 
--- Shift-back by 1 all the de-Brujin indexes in a vector of terms
 shift-back-vec c V.[] = V.[]
 shift-back-vec c (t V.∷ ts) = (shift-back c t) V.∷ (shift-back-vec c ts)
 
@@ -102,25 +97,22 @@ subst+back-vec : (j : ℕ) → (t1 : Term) → (ts : Vec Term n) → Vec Term n
 subst+back-vec j t1 ts = shift-back-vec j (subst-vec j t1 ts)
 
 
-{-
-Beta reduction.
-Just to get an idea:
-    `var 0` occuring in `t2` are replaced by ts[len(ts) - 1].
-    `var 1` occuring in `t2` are replaced by ts[len(ts) - 2].
-    and so on...
-    `var (len(ts) - 1)` occuring in `t2` are replaced by ts[0].
--}
+-- Beta reduction.
+-- The idea:
+--     `var 0` occuring in `t2` are replaced by ts[len(ts) - 1].
+--     `var 1` occuring in `t2` are replaced by ts[len(ts) - 2].
+--     ...
+--     `var (len(ts) - 1)` occuring in `t2` are replaced by ts[0].
 beta-red : (ts : Vec Term n) → (t : Term) → Term
 beta-red V.[]        t = t
 beta-red (t1 V.∷ ts) t = shift-back 0 (subst 0 t1 (beta-red ts t))
 
--- t1 ⇒ t2   means    "Term t1 can do a step to t2".
+-- M ∋ t1  ⇒  t2  :   "In M, the term t1 can do a step to t2".
+-- M ∋ ts1 ⇒v ts2 :   "In M, A term inside ts1 can do a step such that ts1 goes to ts2".
 data _∋_⇒_ : Fin Nm → Term → Term → Set
--- ts1 ⇒v ts2 means   "A term inside ts1 can do a step such that ts1 goes to ts2 ".
 data _∋_⇒v_ : Fin Nm → Vec Term n → Vec Term n → Set
 
 
--- When a term can do a step.
 data _∋_⇒_ where
     Elet :
           (ev : M ∋ t1 ⇒ t1')
@@ -216,9 +208,8 @@ data _∋_⇒_ where
 
 
 
--- When a vector of terms can do a step.
 data _∋_⇒v_ where
-    E[_]_ : -- some term inside ts1 can do a step
+    E[_]_ : -- Some term inside ts1 can do a step
           {ts : Vec Term n2}
         → M ∋ t ⇒ t'
         → ValueV ts
@@ -237,6 +228,7 @@ data _∋_⇒v_ where
 
 
 -- Evaluation in multiple steps.
+-- M ∋ t1 ⇒* t2 : "In M, the term t1 can evolve to t2 in zero or multiple steps".
 -- The "evaluation in multiple steps" relation is the reflexive and transitive
 --   closure of the one-step evaluation relation.
 data _∋_⇒*_ : Fin Nm → Term → Term → Set where
@@ -248,11 +240,11 @@ data _∋_⇒*_ : Fin Nm → Term → Term → Set where
 
 -- -----------------------------------------------------------------------------
 -- ------------------------------------------------------------ HELPER FUNCTIONS
-ev-proof : M ∋ t1 ⇒  t2
-        →  M ∋ t2 ⇒* t3
-        →  M ∋ t1 ⇒* t3
-ev-proof p1 e-refl           = e-trans e-refl p1
-ev-proof p1 (e-trans p2 p3)  = e-trans (ev-proof p1 p2) p3
+⇒+⇒* : M ∋ t1 ⇒  t2
+     →  M ∋ t2 ⇒* t3
+     →  M ∋ t1 ⇒* t3
+⇒+⇒* p1 e-refl           = e-trans e-refl p1
+⇒+⇒* p1 (e-trans p2 p3)  = e-trans (⇒+⇒* p1 p2) p3
 
 
 begin⇒_ : (t : Term) → Term
@@ -263,7 +255,7 @@ _⇒⟨_⟩_ : (t1 : Term)
     → M ∋ t1 ⇒ t2
     → M ∋ t2 ⇒* t3
     → M ∋ t1 ⇒* t3
-t1 ⇒⟨ p1 ⟩ p2 = ev-proof p1 p2
+t1 ⇒⟨ p1 ⟩ p2 = ⇒+⇒* p1 p2
 
 _⇒∎ : (t : Term) → M ∋ t ⇒* t
 t ⇒∎ = e-refl

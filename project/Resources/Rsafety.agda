@@ -81,7 +81,7 @@ Rsafety a (Tcall {M2 = M2} {f = f} {ts = ts} htv) (Ecalled vs)
     L.[] L.++ Rv ts
         ↭⟨ ++⁺ʳ (Rv ts) (↭-sym (↭-reflexive (Rlterm≡[] (body M2 f)))) ⟩
     R (toRun (body M2 f)) L.++ Rv ts
-        ↭⟨ ↭-sym (Rsubsti-multi htv vs (WellFun.hti ((WellMod.wf (W M2)) f))) ⟩
+        ↭⟨ ↭-sym (Rsubsti-multi htv vs (wellHti W M2 f)) ⟩
     R (beta-red ts (toRun (body M2 f))) ∎
 
 Rsafety (all-unpack p a1 a2) (Tunpack {t1 = t1} {t2 = t2} ht hti) (Eunpack ev)

@@ -19,6 +19,7 @@ data Usage : Type → Set where
     _∘ : (T : Type) → Usage T
     _• : (T : Type) → Usage T
 
+-- A Usage environment is a vector of Usages.
 data UEnv : {l : ℕ} → Env l → Set where
     []   : UEnv V.[]
     _u∷_ : {l : ℕ} {T : Type} {Δ : Env l}
@@ -267,3 +268,10 @@ record WellMod (M : Fin Nm) : Set where
         ws : (S : Fin Ns) → WellStr M S
 
 WellProg = ∀ (M : Fin Nm) → WellMod M
+
+
+wellF : WellProg → (M : Fin Nm) → (F : Fin Nf) → WellFun M F
+wellF wp M F = WellMod.wf (wp M) F
+
+wellHti : WellProg → (M : Fin Nm) → (F : Fin Nf) → HasTypeI M [] (argsT M F) (toRun (body M F)) (retT M F) []
+wellHti wp M F = WellFun.hti (wellF wp M F)

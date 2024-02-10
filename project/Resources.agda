@@ -19,38 +19,45 @@ private
         M M2    : Fin Nm
 
 
--- Resources of a term
-R  : Term → List K
+-- R t: "The resources of t"
+-- R defines what we consider the resources of a term.
+-- The resources of a term are a list of keys (or better, a list of identifiers),
+--   that is the list of struct identifiers appearing in the term (with their multiplicity).
+-- R t is a list, but we don't care about the order of the elements in the list.
+-- We use the list type to represent a multi-set.
+R  :           Term       → List K
 Rv : {n : ℕ} → Vec Term n → List K
 
-R (num n) = L.[]
-R (var x) = L.[]
-R (Let t1 In t2) = R t1 L.++ R t2
-R (call fid ts) = Rv ts
-R (if t1 then t2 else t3) = R t1 L.++ R t2
-R (pack sid ts) = Rv ts
-R (unpack t1 In t2) = R t1 L.++ R t2
-R (t · j) = L.[]
-R (pub t) = R t
+R (num n)                   = L.[]
+R (var x)                   = L.[]
+R (Let t1 In t2)            = R t1 L.++ R t2
+R (call fid ts)             = Rv ts
+R (if t1 then t2 else t3)   = R t1 L.++ R t2
+R (pack sid ts)             = Rv ts
+R (unpack t1 In t2)         = R t1 L.++ R t2
+R (t · j)                   = L.[]
+R (pub t)                   = R t
 R (struct k sid ts) with tyIsLin (Tst sid)
-... | yes yLin  = k L.∷ Rv ts
-... | no  nLin  = Rv ts
-R (exec M2 t) = R t
+... | yes yLin              = k L.∷ Rv ts
+... | no  nLin              = Rv ts
+R (exec M2 t)               = R t
 
-Rv V.[] = L.[]
-Rv (t V.∷ ts) = R t L.++ (Rv ts)
+Rv V.[]         = L.[]
+Rv (t V.∷ ts)   = R t L.++ (Rv ts)
 
 
--- Resources introduced by a step of evaluation
-RI  : M ∋ t  ⇒  t'  → List K
+-- RI ev: "The resources introduced by ev"
+-- RI defines what are the resources introduced by a step of evaluation.
+-- The output is a multi-set of sturct identifiers, that we represent as a list.
+RI  :                         M ∋ t  ⇒  t'  → List K
 RIv : {ts ts' : Vec Term n} → M ∋ ts ⇒v ts' → List K
 
 RI (Elet ev)     = RI ev
 RI (Elet2 v)     = L.[]
 RI (Epack evv)   = RIv evv
 RI (Epacked {M = M} {s = s} k vs) with tyIsLin (Tst (sId M s))
-... | yes yLin  = k L.∷ L.[]
-... | no  nLin  = L.[]
+... | yes yLin   = k L.∷ L.[]
+... | no  nLin   = L.[]
 RI (Eunpack ev)  = RI ev
 RI (Eunpacked x) = L.[]
 RI (Ecall evv)   = RIv evv
@@ -68,8 +75,8 @@ RIv (E[ ev ] vs) = RI ev
 RIv (t E∷ evv)   = RIv evv
 
 
--- Resources used by a step of evaluation
-RU  : M ∋ t  ⇒  t'  → List K
+-- RI ev: "The resources used by ev"
+RU  :                         M ∋ t  ⇒  t'  → List K
 RUv : {ts ts' : Vec Term n} → M ∋ ts ⇒v ts' → List K
 
 RU (Elet ev)         = RU ev
@@ -78,8 +85,8 @@ RU (Epack evv)       = RUv evv
 RU (Epacked k vs)    = L.[]
 RU (Eunpack ev)      = RU ev
 RU (Eunpacked {M = M} {k = k} {s = s} vs) with tyIsLin (Tst (sId M s))
-... | yes yLin   = k L.∷ L.[]
-... | no  nLin   = L.[]
+... | yes yLin       = k L.∷ L.[]
+... | no  nLin       = L.[]
 RU (Ecall evv)       = RUv evv
 RU (Ecalled vs)      = L.[]
 RU (Eexec ev)        = RU ev
@@ -95,38 +102,42 @@ RUv (E[ ev ] vs)   = RU ev
 RUv (t E∷ evv)     = RUv evv
 
 
--- A predicate about a Term: "if t is an if-then-else term, then R t2 ↭ R t3"
+-- A predicate about a Term: "If t is an if-then-else term, then R t2 ↭ R t3"
 tIsIf⇒Rt2↭Rt3 : Term → Set
-tIsIf⇒Rt2↭Rt3 t = {t1 t2 t3 : Term} → t ≡ if t1 then t2 else t3 → R t2 ↭ R t3
+tIsIf⇒Rt2↭Rt3 t = {t1 t2 t3 : Term}
+    → t ≡ if t1 then t2 else t3
+    → R t2 ↭ R t3
 
 
 
--- Language terms doesn't contain resources
-Rlterm≡[] : (t : LTerm) → R (toRun t) ≡ L.[]
+-- Language terms, which are a subset of all the terms of the language, never contain resources.
+-- More precisely, terms that are the outputs of a conversion from a language term (LTerm)
+--   to a term (Term), don't contain resources.
+Rlterm≡[] : (t : LTerm)                    → R  (toRun t)      ≡ L.[]
 Rlterm≡[]-vec : {n : ℕ} (ts : Vec LTerm n) → Rv (toRun-vec ts) ≡ L.[]
 
-Rlterm≡[] (num n) = refl
-Rlterm≡[] (var x) = refl
-Rlterm≡[] (Let t1 In t2) rewrite Rlterm≡[] t1 | Rlterm≡[] t2 = refl
-Rlterm≡[] (call fid ts) rewrite Rlterm≡[]-vec ts = refl
-Rlterm≡[] (if t1 then t2 else t3) rewrite Rlterm≡[] t1 | Rlterm≡[] t2 = refl
-Rlterm≡[] (pack sid ts) rewrite Rlterm≡[]-vec ts = refl
-Rlterm≡[] (unpack t1 In t2) rewrite Rlterm≡[] t1 | Rlterm≡[] t2 = refl
-Rlterm≡[] (x · j) = refl
-Rlterm≡[] (pub t) rewrite Rlterm≡[] t = refl
+Rlterm≡[] (num n)                                                       = refl
+Rlterm≡[] (var x)                                                       = refl
+Rlterm≡[] (Let t1 In t2)            rewrite Rlterm≡[] t1 | Rlterm≡[] t2 = refl
+Rlterm≡[] (call fid ts)             rewrite Rlterm≡[]-vec ts            = refl
+Rlterm≡[] (if t1 then t2 else t3)   rewrite Rlterm≡[] t1 | Rlterm≡[] t2 = refl
+Rlterm≡[] (pack sid ts)             rewrite Rlterm≡[]-vec ts            = refl
+Rlterm≡[] (unpack t1 In t2)         rewrite Rlterm≡[] t1 | Rlterm≡[] t2 = refl
+Rlterm≡[] (x · j)                                                       = refl
+Rlterm≡[] (pub t)                   rewrite Rlterm≡[] t                 = refl
 
-Rlterm≡[]-vec V.[] = refl
+Rlterm≡[]-vec V.[]                                              = refl
 Rlterm≡[]-vec (t V.∷ ts) rewrite Rlterm≡[] t | Rlterm≡[]-vec ts = refl
 
 
-
+-- The shift-back operation applied to a term doesn't change its resources.
 shift-back-presR : (c : ℕ) → (t : Term)
     → R (shift-back c t) ≡ R t
 shift-back-presR-vec : (c : ℕ) → (ts : Vec Term n)
     → Rv (shift-back-vec c ts) ≡ Rv ts
 
 shift-back-presR c (num n) = refl
-shift-back-presR c (var x) with x <? c 
+shift-back-presR c (var x) with x <? c
 ... | yes p = refl
 ... | no ¬p = refl
 shift-back-presR c (Let t1 In t2)

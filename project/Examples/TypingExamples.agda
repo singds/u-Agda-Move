@@ -47,7 +47,7 @@ p = prog (
 
 
 open import project.Utility Nm 2 1 1 1 p
-open import project.Typing Nm 2 1 1 1 p
+open import project.Typing  Nm 2 1 1 1 p
 
 
 -- Two usage-environments Γ1, Γ2 depending on the same environment Δ
@@ -69,52 +69,45 @@ pt2 (Tvar ())
 -- pt2 (Tvar ())
 
 -- call destroyCoin (pack Coin [2])
-term1 : Term
-term1 = call destroyCoin ((pack Coin (N2 ∷ [])) ∷ [])
+t1 : Term
+t1 = call destroyCoin ((pack Coin (N2' ∷ [])) ∷ [])
 
--- Prove that term1 is well typed in module 0
-wellTy-term1 : HasType M0 [] term1 Tint []
-wellTy-term1 = Tcall (Tpack (Tnum T∷ T[]) T∷ T[])
+-- Prove that t1 is well typed in module 0
+wellTy-t1 : HasType M0 [] t1 Tint []
+wellTy-t1 = Tcall (Tpack (Tnum T∷ T[]) T∷ T[])
 
+-- The Coin type is not linear
+¬L-Coin : ¬ (IsLinear (Tst Coin))
+¬L-Coin (lin ())
 
-
-{-
-    let x = pack Coin [2] in x
--}
--- term2 : Term
--- term2 = Let (pack Coin (N2 ∷ [])) In v0
-
--- -- Prove that term2 is well typed in module 0
--- wellTy-term2 : HasType M0 [] term2 (Tst Coin) []
--- wellTy-term2 = Tlet (Tpack (Tnum T∷ T[])) ((λ { (lin ()) }) I∷ I[ Tvar (λ {(lin ())}) ])
---                                                                              ^
---                                                                              |
---             note here the presence of the absurd pattern                     |
--- see absurd pattern in official doc.
--- https://agda.readthedocs.io/en/v2.6.0.1/language/function-definitions.html#absurd-patterns
+L-LinCoin : IsLinear (Tst LinCoin)
+L-LinCoin = lin refl
 
 
--- {-
+--  let x = pack Coin [2] in x
+t2 : Term
+t2 = Let (pack Coin (N2' ∷ [])) In v0'
+
+-- Prove that t2 is well typed in module 0
+wellTy-t2 : HasType M0 [] t2 (Tst Coin) []
+wellTy-t2 = Tlet (Tpack (Tnum T∷ T[])) (¬L-Coin I∷ I[ Tvar (Xz λ lc → ¬L-Coin lc) ])
+
+
 -- WE CAN'T COPY A LINEAR VALUE
-
 --     let x = pack LinCoin [2] in
 --     let y = x in
 --     let z = x in
---     0
--- -}
--- term8 : Term
--- term8 = Let (pack LinCoin (N2 ∷ []))   -- let introduces x
---         In (Let v0                      -- let introduces y
---             In (Let v1                  -- let introduces z
---                 In N0                   -- this is not relevant
---             )
---         )
+--    0
+t8 : Term
+t8 = Let (pack LinCoin (N2' ∷ []))  -- let introduces x
+        In (Let v0'                 -- let introduces y
+            In (Let v1'             -- let introduces z
+                In N0'              -- this is not relevant
+            )
+        )
 
--- ¬wellTy-term8 : ∀ (T : Type) → ¬ HasType M0 [] term8 T []
--- ¬wellTy-term8 T (Tlet nLin (Tpack x) ht2) = nLin (lin refl)
--- --                    ^^^^
--- --  The type LinCoin is linear, the non linear Tlet can't be applied.
--- ¬wellTy-term8 T ht = ?
+-- ¬wellTy-t8 : ∀ (T : Type) → ¬ HasType M0 [] t8 T []
+-- ¬wellTy-t8 T (Tlet (Tpack htv) hti) = {!   !}
 
 
 -- {-
@@ -223,6 +216,3 @@ wellTy-term1 = Tcall (Tpack (Tnum T∷ T[]) T∷ T[])
 
 -- wellTy-term9 : HasType M0 `[] term9 LinCoinT `[]
 -- wellTy-term9 = TletL (lin {#0} {#1} refl) (Tpack (Tnum T∷ T[])) (Tseq ¬linTint Tnum (TvarL (lin refl)))
-
-
-(remove x Γ) = Γ

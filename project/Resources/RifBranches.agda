@@ -89,7 +89,7 @@ RifEval (Tunpack (Tstruct _ htv) hti) (Eunpacked vs) (all-unpack _ a1 a2)
 RifEval (Tcall htv) (Ecall ev) (all-call _ a)
     = all-call (λ ()) (RifEval-vec htv ev a)
 RifEval (Tcall {M2 = M2} {f = f} htv) (Ecalled vs) _
-    = all-exec (λ ()) (RifBeta htv vs (WellFun.hti ((WellMod.wf (W M2)) f)) (RifLterm (body M2 f)))
+    = all-exec (λ ()) (RifBeta htv vs (wellHti W M2 f) (RifLterm (body M2 f)))
 RifEval (Texec ht) (Eexec ev) (all-exec _ a) = all-exec (λ ()) (RifEval ht ev a)
 RifEval ht (Eexecuted v) (all-exec _ a) = a
 RifEval (Tif ht1 ht2 ht3) (Eif ev) (all-if p a1 a2 a3) = all-if (λ { refl → p refl }) (RifEval ht1 ev a1) a2 a3

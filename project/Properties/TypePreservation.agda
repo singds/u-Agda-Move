@@ -52,10 +52,10 @@ type-preservation (Tunpack (Tstruct vs' htv) hti) (Eunpacked vs)
 type-preservation (Tcall htv) (Ecall eva)
     = Tcall (type-preservation-vec htv eva)
 
--- Here we use the hypothesys of well-formedness of the function we are calling
+-- Here we use the hypothesis of well-formedness of the function we are calling
 type-preservation (Tcall {M2 = M2} {f = f} htv) (Ecalled vs)
     rewrite htval⇒Γ1≡Γ2-vec vs htv
-    = Texec (substi-multi htv vs (WellFun.hti ((WellMod.wf (W M2)) f)))
+    = Texec (substi-multi htv vs (wellHti W M2 f))
 
 type-preservation (Texec ht) (Eexec ev)
     = Texec (type-preservation ht ev)
