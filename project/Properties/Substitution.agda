@@ -3,16 +3,16 @@ import project.Syntax as Syntax
 import project.Typing as Typing
 
 module project.Properties.Substitution
-    (Nm Ns Nf Nsf Nfa : Data.Nat.ℕ)
+    {Nm Ns Nf Nsf Nfa : Data.Nat.ℕ}
     (P : Syntax.Program Nm Ns Nf Nsf Nfa)
     where
 
-open import project.Properties.Include Nm Ns Nf Nsf Nfa P
-open import project.Properties.ValueType Nm Ns Nf Nsf Nfa P
-open import project.Properties.ValueEval Nm Ns Nf Nsf Nfa P
-open import project.Properties.Weakening Nm Ns Nf Nsf Nfa P
-open import project.Properties.UsageConstraints Nm Ns Nf Nsf Nfa P
-open import project.Properties.Misc Nm Ns Nf Nsf Nfa P
+open import project.Properties.Include P
+open import project.Properties.ValueType P
+open import project.Properties.ValueEval P
+open import project.Properties.Weakening P
+open import project.Properties.UsageConstraints P
+open import project.Properties.Misc P
 
 private
     variable

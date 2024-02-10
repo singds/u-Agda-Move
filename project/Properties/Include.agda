@@ -4,7 +4,7 @@ import project.Syntax as Syntax
 import project.Typing as Typing
 
 module project.Properties.Include
-    (Nm Ns Nf Nsf Nfa : ℕ)
+    {Nm Ns Nf Nsf Nfa : ℕ}
     (P : Syntax.Program Nm Ns Nf Nsf Nfa)
     where
 

@@ -3,11 +3,11 @@ import project.Syntax as Syntax
 import project.Typing as Typing
 
 module project.Properties.ValueEval
-    (Nm Ns Nf Nsf Nfa : Data.Nat.ℕ)
+    {Nm Ns Nf Nsf Nfa : Data.Nat.ℕ}
     (P : Syntax.Program Nm Ns Nf Nsf Nfa)
     where
 
-open import project.Properties.Include Nm Ns Nf Nsf Nfa P
+open import project.Properties.Include P
 
 shift-val-eq :
       {d c : ℕ}

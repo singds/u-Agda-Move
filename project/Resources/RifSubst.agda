@@ -3,15 +3,15 @@ import project.Syntax as Syntax
 import project.Typing as Typing
 
 module project.Resources.RifSubst
-    (Nm Ns Nf Nsf Nfa : Data.Nat.ℕ)
+    {Nm Ns Nf Nsf Nfa : Data.Nat.ℕ}
     (P : Syntax.Program Nm Ns Nf Nsf Nfa)
     (W : Typing.WellProg Nm Ns Nf Nsf Nfa P)
     where
 
-open import project.Properties.Include Nm Ns Nf Nsf Nfa P
-open import project.Resources.Rsubstitution Nm Ns Nf Nsf Nfa P W
-open import project.Resources.RifValue Nm Ns Nf Nsf Nfa P
-open import project.Properties.UsageConstraints Nm Ns Nf Nsf Nfa P
+open import project.Properties.Include P
+open import project.Resources.Rsubstitution P W
+open import project.Resources.RifValue P
+open import project.Properties.UsageConstraints P
 
 open import Data.List.Relation.Binary.Permutation.Propositional
 open import Data.List.Relation.Binary.Permutation.Propositional.Properties

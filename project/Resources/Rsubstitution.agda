@@ -3,16 +3,16 @@ import project.Syntax as Syntax
 import project.Typing as Typing
 
 module project.Resources.Rsubstitution
-    (Nm Ns Nf Nsf Nfa : Data.Nat.ℕ)
+    {Nm Ns Nf Nsf Nfa : Data.Nat.ℕ}
     (P : Syntax.Program Nm Ns Nf Nsf Nfa)
     (W : Typing.WellProg Nm Ns Nf Nsf Nfa P)
     where
 
-open import project.Properties.Include Nm Ns Nf Nsf Nfa P
-open import project.Properties.UsageConstraints Nm Ns Nf Nsf Nfa P
-open import project.Properties.Misc Nm Ns Nf Nsf Nfa P
-open import project.Properties.Substitution Nm Ns Nf Nsf Nfa P
-open import project.Resources.RnonLinValues Nm Ns Nf Nsf Nfa P W
+open import project.Properties.Include P
+open import project.Properties.UsageConstraints P
+open import project.Properties.Misc P
+open import project.Properties.Substitution P
+open import project.Resources.RnonLinValues P W
 
 open import Data.List.Relation.Binary.Permutation.Propositional
 open import Data.List.Relation.Binary.Permutation.Propositional.Properties

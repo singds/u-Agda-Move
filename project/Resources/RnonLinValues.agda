@@ -3,12 +3,12 @@ import project.Syntax as Syntax
 import project.Typing as Typing
 
 module project.Resources.RnonLinValues
-    (Nm Ns Nf Nsf Nfa : Data.Nat.ℕ)
+    {Nm Ns Nf Nsf Nfa : Data.Nat.ℕ}
     (P : Syntax.Program Nm Ns Nf Nsf Nfa)
     (W : Typing.WellProg Nm Ns Nf Nsf Nfa P)
     where
 
-open import project.Properties.Include Nm Ns Nf Nsf Nfa P
+open import project.Properties.Include P
 
 private
     variable

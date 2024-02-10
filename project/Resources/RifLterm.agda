@@ -2,11 +2,11 @@ import Data.Nat
 import project.Syntax as Syntax
 
 module project.Resources.RifLterm
-    (Nm Ns Nf Nsf Nfa : Data.Nat.ℕ)
+    {Nm Ns Nf Nsf Nfa : Data.Nat.ℕ}
     (P : Syntax.Program Nm Ns Nf Nsf Nfa)
     where
 
-open import project.Properties.Include Nm Ns Nf Nsf Nfa P
+open import project.Properties.Include P
 
 open import Data.List.Relation.Binary.Permutation.Propositional
 open import Data.List.Relation.Binary.Permutation.Propositional.Properties

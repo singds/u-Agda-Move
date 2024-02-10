@@ -2,11 +2,11 @@ import Data.Nat
 import project.Syntax as Syntax
 
 module project.Resources.RifValue
-    (Nm Ns Nf Nsf Nfa : Data.Nat.ℕ)
+    {Nm Ns Nf Nsf Nfa : Data.Nat.ℕ}
     (P : Syntax.Program Nm Ns Nf Nsf Nfa)
     where
 
-open import project.Properties.Include Nm Ns Nf Nsf Nfa P
+open import project.Properties.Include P
 
 private
     variable

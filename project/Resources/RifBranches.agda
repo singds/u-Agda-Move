@@ -3,16 +3,16 @@ import project.Syntax as Syntax
 import project.Typing as Typing
 
 module project.Resources.RifBranches
-    (Nm Ns Nf Nsf Nfa : Data.Nat.ℕ)
+    {Nm Ns Nf Nsf Nfa : Data.Nat.ℕ}
     (P : Syntax.Program Nm Ns Nf Nsf Nfa)
     (W : Typing.WellProg Nm Ns Nf Nsf Nfa P)
     where
 
-open import project.Properties.Include Nm Ns Nf Nsf Nfa P
-open import project.Properties.Substitution Nm Ns Nf Nsf Nfa P
-open import project.Resources.RifLterm Nm Ns Nf Nsf Nfa P
-open import project.Resources.RifSubst Nm Ns Nf Nsf Nfa P W
-open import project.Resources.RifShiftBack Nm Ns Nf Nsf Nfa P
+open import project.Properties.Include P
+open import project.Properties.Substitution P
+open import project.Resources.RifLterm P
+open import project.Resources.RifSubst P W
+open import project.Resources.RifShiftBack P
 
 open import Data.List.Relation.Binary.Permutation.Propositional
 open import Data.List.Relation.Binary.Permutation.Propositional.Properties
