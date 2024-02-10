@@ -72,17 +72,17 @@ Rsafety a (Tpack {ts = ts} htv) (Epacked {M = M} {s = s} k x) with tyIsLin (Tst 
 ... | no  nLin = refl
 Rsafety (all-call p av) (Tcall htv) (Ecall ev) = Rsafety-vec av htv ev
 
--- Here we use the fact that the function is well formed, and that the body
+-- Here we use the fact that the function is well formed, and that the gBody
 --   of the function is an LTerm (a language term).
 -- LTerms are a subset of Terms
 Rsafety a (Tcall {M2 = M2} {f = f} {ts = ts} htv) (Ecalled vs)
     = begin
     Rv ts               ↭⟨ refl ⟩
     L.[] L.++ Rv ts
-        ↭⟨ ++⁺ʳ (Rv ts) (↭-sym (↭-reflexive (Rlterm≡[] (body M2 f)))) ⟩
-    R (toRun (body M2 f)) L.++ Rv ts
+        ↭⟨ ++⁺ʳ (Rv ts) (↭-sym (↭-reflexive (Rlterm≡[] (gBody M2 f)))) ⟩
+    R (toRun (gBody M2 f)) L.++ Rv ts
         ↭⟨ ↭-sym (Rsubsti-multi htv vs (wellHti W M2 f)) ⟩
-    R (beta-red ts (toRun (body M2 f))) ∎
+    R (beta-red ts (toRun (gBody M2 f))) ∎
 
 Rsafety (all-unpack p a1 a2) (Tunpack {t1 = t1} {t2 = t2} ht hti) (Eunpack ev)
     = lemma↭3 (R t2) (RI ev) (RU ev) (Rsafety a1 ht ev)

@@ -14,42 +14,42 @@ open import Data.Vec as V using (Vec; lookup)
 open import Data.Bool as B using (Bool; true; false)
 open import Data.Empty as Empty using (⊥; ⊥-elim)
 
-mod : (m : Fin Nm) → Module
-mod m = lookup (Program.modDefs P) m
+gMod : (m : Fin Nm) → Module
+gMod m = lookup (Program.mods P) m
 
 -- Get the stducts defined in a module
-strs : (m : Fin Nm) → Vec StrDef Ns
-strs m = Module.strDefs (mod m)
+gStrs : (m : Fin Nm) → Vec Str Ns
+gStrs m = Module.strs (gMod m)
 
 -- Get a struct
-str : (m : Fin Nm) → (s : Fin Ns) → StrDef
-str m s = lookup (strs m) s
+gStr : (m : Fin Nm) → (s : Fin Ns) → Str
+gStr m s = lookup (gStrs m) s
 
 -- Check if a struct is linear
-isLin : (m : Fin Nm) → (s : Fin Ns) → Bool
-isLin m s = StrDef.isLin (lookup (strs m) s)
+gIsLin : (m : Fin Nm) → (s : Fin Ns) → Bool
+gIsLin m s = Str.isLin (lookup (gStrs m) s)
 
 -- Get the list of fields of a struct
-fieldsT : (m : Fin Nm) → (s : Fin Ns) → Vec Type Nsf
-fieldsT m s = StrDef.fieldsT (str m s)
+gFieldsT : (m : Fin Nm) → (s : Fin Ns) → Vec Type Nsf
+gFieldsT m s = Str.fieldsT (gStr m s)
 
 
 
 -- Get the functions defined in a module
-funs : (m : Fin Nm) → Vec FunDef Nf
-funs m = Module.funDefs (mod m)
+gFuns : (m : Fin Nm) → Vec Fun Nf
+gFuns m = Module.funs (gMod m)
 
 -- Get a function
-fun : (m : Fin Nm) → (f : Fin Nf) → FunDef
-fun m f = lookup (funs m) f
+gFun : (m : Fin Nm) → (f : Fin Nf) → Fun
+gFun m f = lookup (gFuns m) f
 
-argsT : (m : Fin Nm) → (f : Fin Nf) → Vec Type Nfa
-argsT m f = FunDef.argsT (fun m f)
+gArgsT : (m : Fin Nm) → (f : Fin Nf) → Vec Type Nfa
+gArgsT m f = Fun.argsT (gFun m f)
 
-retT : (m : Fin Nm) → (f : Fin Nf) → Type
-retT m f = FunDef.retT (fun m f)
+gRetT : (m : Fin Nm) → (f : Fin Nf) → Type
+gRetT m f = Fun.retT (gFun m f)
 
-body : (m : Fin Nm) → (f : Fin Nf) → LTerm
-body m f = FunDef.body (fun m f)
+gBody : (m : Fin Nm) → (f : Fin Nf) → LTerm
+gBody m f = Fun.body (gFun m f)
 
 absurd = ⊥-elim

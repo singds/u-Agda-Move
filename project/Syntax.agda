@@ -87,32 +87,32 @@ data Type : Set where
     Tint : Type
     Tst  : StrId → Type -- Every struct identifier is also a type
 
-record StrDef : Set where
-    constructor strDef
+record Str : Set where
+    constructor str
     field
         isLin   : Bool -- true if the structure is a linear type
         fieldsT : Vec Type Nsf
         -- The types of the fields of the struct.
-        -- Field 0 has type fieldsT[0], etc.
+        -- Field 0 has type gFieldsT[0], etc.
         -- Struct fields don't have names.
 
-record FunDef : Set where
-    constructor funDef
+record Fun : Set where
+    constructor fun
     field
         argsT : Vec Type Nfa    -- Argument types
         retT  : Type            -- Return type
         body  : LTerm
 
 record Module : Set where
-    constructor modDef
+    constructor mod
     field
-        strDefs : Vec StrDef Ns
-        funDefs : Vec FunDef Nf
+        strs : Vec Str Ns
+        funs : Vec Fun Nf
 
 record Program : Set where
     constructor prog
     field
-        modDefs : Vec Module Nm
+        mods : Vec Module Nm
 
 
 -- Definition of value; defines what terms are considered values.

@@ -23,45 +23,45 @@ unbalancedUse = fId CoinM #7
 □ : Type;   □ = Tint
 
 CoinModule : Module
-CoinModule = modDef (
-          strDef false (Tint ∷ □ ⨾)         -- Owner
-        ∷ strDef true  (OwnerT ∷ Tint ⨾)    -- Coin
+CoinModule = Mod (
+          str false (Tint ∷ □ ⨾)         -- Owner
+        ∷ str true  (OwnerT ∷ Tint ⨾)    -- Coin
         ⨾
     ) (
-        funDef (CoinT{- C1 -} ∷ OwnerT{- O2 -} ⨾) Tint ( -- transfer
+        fun (CoinT{- C1 -} ∷ OwnerT{- O2 -} ⨾) Tint ( -- transfer
             unpack {- O1,V = -} v1{- C1 -} In
                 Let {- C2 = -} pack Coin (v2{- O2 -} ∷ v0{- V -} ⨾) In
                     pub v0{- C2 -}
         )
-        ∷ funDef (OwnerT{- OW -} ∷ □ ⨾) Tint ( -- create
+        ∷ fun (OwnerT{- OW -} ∷ □ ⨾) Tint ( -- create
             pub (pack Coin (v1{- OW -} ∷ N0 ⨾))
         )
-        ∷ funDef (CoinT{- C -} ∷ □ ⨾) OwnerT ( -- getOwner
+        ∷ fun (CoinT{- C -} ∷ □ ⨾) OwnerT ( -- getOwner
             Let {- O = -} 1{- C -} · #0 In
             Let pub v2{- C -} In
             v1{- O -}
         )
-        ∷ funDef (CoinT{- C -} ∷ Tint{- Y -} ⨾) Tint ( -- deleteIf
+        ∷ fun (CoinT{- C -} ∷ Tint{- Y -} ⨾) Tint ( -- deleteIf
             if v0{- Y -} then
                 unpack v1{- C -} In N0
             else
                 pub v1{- C -}
         )
-        ∷ funDef (Tint{- Y -} ∷ OwnerT{- O -} ⨾) Tint ( -- createIf
+        ∷ fun (Tint{- Y -} ∷ OwnerT{- O -} ⨾) Tint ( -- createIf
             if v1{- Y -} then
                 pub (pack Coin (v0{- O -} ∷ N0 ⨾))
             else
                 N0
         )
         -- Errors
-        ∷ funDef (CoinT ∷ □ ⨾) Tint ( -- dropError
+        ∷ fun (CoinT ∷ □ ⨾) Tint ( -- dropError
             N0
         )
-        ∷ funDef (CoinT{- C -} ∷ □ ⨾) Tint ( -- doubleSpend
+        ∷ fun (CoinT{- C -} ∷ □ ⨾) Tint ( -- doubleSpend
             Let pub v1{- C -} In
             pub v2{- C -}
         )
-        ∷ funDef (CoinT{- C -} ∷ Tint{- Y -} ⨾) Tint ( -- unbalancedUse
+        ∷ fun (CoinT{- C -} ∷ Tint{- Y -} ⨾) Tint ( -- unbalancedUse
             if v0{- Y -} then
                 unpack v1{- C -} In N0
             else

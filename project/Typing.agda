@@ -69,13 +69,13 @@ private
 data IsLinear : Type → Set where
     lin :
           {m : Fin Nm} {s : Fin Ns}
-        → isLin m s ≡ true
+        → gIsLin m s ≡ true
         → IsLinear (Tst (sId m s))
 
 -- Computable function to check if a type is linear
 tyIsLin : (T : Type) → Dec (IsLinear T)
 tyIsLin Tint                 = no (λ { () })
-tyIsLin (Tst (sId m s)) with isLin m s BP.≟ true
+tyIsLin (Tst (sId m s)) with gIsLin m s BP.≟ true
 tyIsLin (Tst (sId m s)) | no ¬p = no λ { (lin {.m} {.s} pl) → ¬p pl }
 tyIsLin (Tst (sId m s)) | yes p = yes (lin p)
 
@@ -139,7 +139,7 @@ data HasType M where
     Tpack :
           {s : Fin Ns}
         → {ts : Vec Term Nsf}
-        → (htv : HasTypeV M Γ1 ts (fieldsT M s) Γ2)
+        → (htv : HasTypeV M Γ1 ts (gFieldsT M s) Γ2)
         --------------------
         → HasType M Γ1 (pack (sId M s) ts) (Tst (sId M s)) Γ2
 
@@ -148,7 +148,7 @@ data HasType M where
           {M2 : Fin Nm}
         → {ts : Vec Term Nsf}
         → (vs : ValueV ts)
-        → (htv : HasTypeV M Γ ts (fieldsT M2 s) Γ)
+        → (htv : HasTypeV M Γ ts (gFieldsT M2 s) Γ)
         --------------------
         → HasType M Γ (struct k (sId M2 s) ts) (Tst (sId M2 s)) Γ
 
@@ -156,14 +156,14 @@ data HasType M where
           {M2 : Fin Nm}
         → {f : Fin Nf}
         → {ts : Vec Term Nfa}
-        → (htv : HasTypeV M Γ1 ts (argsT M2 f) Γ2)
+        → (htv : HasTypeV M Γ1 ts (gArgsT M2 f) Γ2)
         --------------------
-        → HasType M Γ1 (call (fId M2 f) ts) (retT M2 f) Γ2
+        → HasType M Γ1 (call (fId M2 f) ts) (gRetT M2 f) Γ2
 
     Tunpack :
           {s : Fin Ns}
         → (ht  : HasType  M Γ1 t1 (Tst (sId M s)) Γ2)
-        → (hti : HasTypeI M Γ2 (fieldsT M s) t2 T2 Γ3)
+        → (hti : HasTypeI M Γ2 (gFieldsT M s) t2 T2 Γ3)
         --------------------
         → HasType M Γ1 (unpack t1 In t2) T2 Γ3
 
@@ -184,18 +184,18 @@ data HasType M where
           {s : Fin Ns}
           {j : Fin Nsf}
         → (htx : HasTypeX Γ1 x (Tst (sId M s)) Γ2)
-        → (nLin : ¬ IsLinear (V.lookup (fieldsT M s) j))
+        → (nLin : ¬ IsLinear (V.lookup (gFieldsT M s) j))
         --------------------
-        → HasType M Γ1 ((var x) · j) (V.lookup (fieldsT M s) j) Γ1
+        → HasType M Γ1 ((var x) · j) (V.lookup (gFieldsT M s) j) Γ1
 
     TselV :
           {s : Fin Ns}
           {j : Fin Nsf}
         → (v  : Value t)
         → (ht : HasType M Γ t (Tst (sId M s)) Γ)
-        → (nLin : ¬ IsLinear (V.lookup (fieldsT M s) j))
+        → (nLin : ¬ IsLinear (V.lookup (gFieldsT M s) j))
         --------------------
-        → HasType M Γ (t · j) (V.lookup (fieldsT M s) j) Γ
+        → HasType M Γ (t · j) (V.lookup (gFieldsT M s) j) Γ
 
     Tpub :
           (ht   : HasType M Γ1 t T Γ2)
@@ -251,7 +251,7 @@ infixr 5 _T∷_
 record WellFun (M : Fin Nm) (F : Fin Nf) : Set where
     constructor well
     field
-        hti : HasTypeI M [] (argsT M F) (toRun (body M F)) (retT M F) []
+        hti : HasTypeI M [] (gArgsT M F) (toRun (gBody M F)) (gRetT M F) []
 
 -- WellStr M S: "The struct S in module M is well formed."
 record WellStr (M : Fin Nm) (S : Fin Ns) : Set where
@@ -259,7 +259,7 @@ record WellStr (M : Fin Nm) (S : Fin Ns) : Set where
     field
         nLin : (¬ IsLinear (Tst (sId M S))
             → (j : Fin Nsf)
-            → ¬ IsLinear (V.lookup (fieldsT M S) j))
+            → ¬ IsLinear (V.lookup (gFieldsT M S) j))
 
 -- WellMod M: "The module M is well formed."
 record WellMod (M : Fin Nm) : Set where
@@ -273,5 +273,5 @@ WellProg = ∀ (M : Fin Nm) → WellMod M
 wellF : WellProg → (M : Fin Nm) → (F : Fin Nf) → WellFun M F
 wellF wp M F = WellMod.wf (wp M) F
 
-wellHti : WellProg → (M : Fin Nm) → (F : Fin Nf) → HasTypeI M [] (argsT M F) (toRun (body M F)) (retT M F) []
+wellHti : WellProg → (M : Fin Nm) → (F : Fin Nf) → HasTypeI M [] (gArgsT M F) (toRun (gBody M F)) (gRetT M F) []
 wellHti wp M F = WellFun.hti (wellF wp M F)

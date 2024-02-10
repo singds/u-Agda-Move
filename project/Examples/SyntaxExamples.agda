@@ -12,10 +12,10 @@ owner = v1
 amount = v0
 
 m1 : Module
-m1 = modDef (
-        strDef false (Tint ∷ Tint ⨾) ⨾   -- Coin
+m1 = mod (
+        str false (Tint ∷ Tint ⨾) ⨾   -- Coin
     ) (
-        funDef (CoinT ∷ Tint ⨾) Tint (   -- transferCoin
+        fun (CoinT ∷ Tint ⨾) Tint (   -- transferCoin
             unpack v0 In (
                 Let pack Coin (v2 ∷ amount ⨾) In
                     N0
@@ -29,5 +29,5 @@ ms1 : Program
 ms1 = prog (m1 ⨾)
 
 t1 : Term
-t1 = call deleteCoin ((pack Coin (N2 ⨾)) ⨾)
+t1 = call deleteCoin ((pack Coin (N2' ⨾)) ⨾)
 

@@ -12,11 +12,11 @@ destroyAsset = fId #0 #0
 
 p : Program
 p = prog (
-        modDef (
-            strDef true (Tint ∷ Tint ⨾) -- MyAsset
+        Mod (
+            str true (Tint ∷ Tint ⨾) -- MyAsset
             ⨾
         ) (
-            funDef (MyAssetT ⨾) Tint ( -- destroyAsset
+            fun (MyAssetT ⨾) Tint ( -- destroyAsset
                 unpack v0 In v0
             )
             ⨾

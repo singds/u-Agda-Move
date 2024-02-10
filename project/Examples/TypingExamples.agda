@@ -1,17 +1,3 @@
-{-
-#!/bin/bash
-
-file="$1"
-echo "replace in $file"
-
-sed -i 's/Typing\.HasType\.//g' "$file"
-sed -i 's/Typing\.IsLinear\.//g' "$file"
-sed -i 's/Typing\.HasTypeV\.//g' "$file"
-sed -i 's/Typing\.HasTypeI\.//g' "$file"
-
-echo "replace done"
--}
-
 module project.Examples.TypingExamples where
 
 open import project.IncludeBase
@@ -32,13 +18,13 @@ destroyCoin = fId #0 #0
 
 p : Program
 p = prog (
-        modDef (
-            strDef false (Tint ⨾) -- Coin
+        mod (
+            str false (Tint ⨾) -- Coin
             ∷
-            strDef true (Tint ⨾)  -- LinCoin
+            str true (Tint ⨾)  -- LinCoin
             ⨾
         ) (
-            funDef (CoinT ⨾) Tint ( -- destroyCoin
+            fun (CoinT ⨾) Tint ( -- destroyCoin
                 unpack v0 In v0
             )
             ⨾

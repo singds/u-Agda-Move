@@ -35,7 +35,7 @@ progress {M = M} (Tpack {s = s} {ts = ts} htv)
 progress (Tstruct vs htv) = inj₁ (Vstruct vs)
 progress (Tcall {M2 = M2} {f = f} {ts = ts} htv)
     with progress-vec htv
-... | inj₁ vs          = inj₂ (exec M2 (beta-red ts (toRun (body M2 f))) , Ecalled vs)
+... | inj₁ vs          = inj₂ (exec M2 (beta-red ts (toRun (gBody M2 f))) , Ecalled vs)
 ... | inj₂ (ts' , ev)  = inj₂ (call (fId M2 f) ts'                       , Ecall ev)
 progress (Tunpack {Γ1 = []} {Γ2 = []} {t2 = t2} ht hti)
     with progress ht

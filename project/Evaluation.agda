@@ -163,7 +163,7 @@ data _∋_⇒_ where
         → {ts : Vec Term Nfa}
         → (vs : ValueV ts)
         --------------------
-        → M ∋ (call (fId M2 f) ts) ⇒ exec M2 (beta-red ts (toRun (body M2 f)))
+        → M ∋ (call (fId M2 f) ts) ⇒ exec M2 (beta-red ts (toRun (gBody M2 f)))
 
     Eexec :
           (ev : M2 ∋ t ⇒ t')
