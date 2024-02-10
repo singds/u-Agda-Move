@@ -79,7 +79,7 @@ wellTy-t2 : HasType M0 [] t2 (Tst Coin) []
 wellTy-t2 = Tlet (Tpack (Tnum T∷ T[])) (¬L-Coin I∷ I[ Tvar (Xz λ lc → ¬L-Coin lc) ])
 
 
--- WE CAN'T COPY A LINEAR VALUE
+-- CAN'T COPY A LINEAR VALUE
 --     let x = pack LinCoin [2] in
 --     let y = x in
 --     let z = x in
@@ -92,8 +92,14 @@ t8 = Let (pack LinCoin (N2' ∷ []))  -- let introduces x
             )
         )
 
--- ¬wellTy-t8 : ∀ (T : Type) → ¬ HasType M0 [] t8 T []
--- ¬wellTy-t8 T (Tlet (Tpack htv) hti) = {!   !}
+¬wellTy-t8 : ∀ (T : Type) → ¬ HasType M0 [] t8 T []
+¬wellTy-t8 T (Tlet (Tpack htv) (nLin I∷  hti))
+    = absurd (nLin L-LinCoin)
+¬wellTy-t8 T (Tlet (Tpack htv) (yLin I∷l I[ Tlet (Tvar (Xz  nLin )) hti ]))
+    = absurd (nLin L-LinCoin)
+¬wellTy-t8 T (Tlet (Tpack htv) (yLin I∷l I[ Tlet (Tvar (XzL yLin2)) (nLin  I∷  hti) ]))
+    = absurd (nLin L-LinCoin)
+¬wellTy-t8 T (Tlet (Tpack htv) (yLin I∷l I[ Tlet (Tvar (XzL yLin2)) (yLin3 I∷l I[ Tlet (Tvar (Xs ())) hti ]) ]))
 
 
 -- {-
@@ -202,3 +208,4 @@ t8 = Let (pack LinCoin (N2' ∷ []))  -- let introduces x
 
 -- wellTy-term9 : HasType M0 `[] term9 LinCoinT `[]
 -- wellTy-term9 = TletL (lin {#0} {#1} refl) (Tpack (Tnum T∷ T[])) (Tseq ¬linTint Tnum (TvarL (lin refl)))
+ 

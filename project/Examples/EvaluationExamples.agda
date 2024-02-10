@@ -12,7 +12,7 @@ destroyAsset = fId #0 #0
 
 p : Program
 p = prog (
-        Mod (
+        mod (
             str true (Tint ∷ Tint ⨾) -- MyAsset
             ⨾
         ) (

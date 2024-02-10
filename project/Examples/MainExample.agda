@@ -23,7 +23,7 @@ unbalancedUse = fId CoinM #7
 □ : Type;   □ = Tint
 
 CoinModule : Module
-CoinModule = Mod (
+CoinModule = mod (
           str false (Tint ∷ □ ⨾)         -- Owner
         ∷ str true  (OwnerT ∷ Tint ⨾)    -- Coin
         ⨾
