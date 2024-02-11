@@ -74,6 +74,10 @@ RI (Epub2 v)     = L.[]
 RIv (E[ ev ] vs) = RI ev
 RIv (t E∷ evv)   = RIv evv
 
+RI* : M ∋ t ⇒* t' → List K
+RI* e-refl           = L.[]
+RI* (e-trans evs ev) = RI* evs L.++ RI ev
+
 
 -- RI ev: "The resources used by ev"
 RU  :                         M ∋ t  ⇒  t'  → List K
@@ -100,6 +104,10 @@ RU (Epub2 {t = t} v) = R t
 
 RUv (E[ ev ] vs)   = RU ev
 RUv (t E∷ evv)     = RUv evv
+
+RU* : M ∋ t ⇒* t' → List K
+RU* e-refl           = L.[]
+RU* (e-trans evs ev) = RU* evs L.++ RU ev
 
 
 -- A predicate about a Term: "If t is an if-then-else term, then R t2 ↭ R t3"

@@ -121,3 +121,23 @@ Rsafety-vec (all-vec∷ a av) (ht T∷ htv) (_E∷_ {ts = ts} {ts' = ts'} t evs)
     (RUv evs L.++ Rv ts') L.++ R t  ↭⟨ ++-assoc (RUv evs) (Rv ts') (R t) ⟩
     RUv evs L.++ (Rv ts' L.++ R t)  ↭⟨ ++⁺ˡ (RUv evs) (++-comm (Rv ts') (R t)) ⟩
     RUv evs L.++ (R t L.++ Rv ts')  ∎
+
+
+
+Rsafety* :
+      All tIsIf⇒Rt2↭Rt3 t
+    → HasType M Γ1 t T Γ2
+    → (evs : M ∋ t ⇒* t')
+    → RI* evs L.++ R t ↭ RU* evs L.++ R t'
+Rsafety* p ht e-refl           = ↭-reflexive refl
+Rsafety* p ht (e-trans {t1 = t1} {t2 = t2} {t3 = t3} evs ev) =
+    begin
+    (RI* evs L.++ RI ev) L.++ R t1  ↭⟨ ++-assoc (RI* evs) (RI ev) (R t1) ⟩
+    RI* evs L.++ (RI ev L.++ R t1)  ↭⟨ ++⁺ˡ (RI* evs) (++-comm (RI ev) (R t1)) ⟩
+    RI* evs L.++ (R t1 L.++ RI ev)  ↭⟨ ↭-sym (++-assoc (RI* evs) (R t1) (RI ev)) ⟩
+    (RI* evs L.++ R t1) L.++ RI ev  ↭⟨ ++⁺ʳ (RI ev) (Rsafety* {!   !} {!   !} evs) ⟩
+    (RU* evs L.++ R t2) L.++ RI ev  ↭⟨ {!   !} ⟩
+    RU* evs L.++ (R t2 L.++ RI ev)  ↭⟨ {!   !} ⟩
+    RU* evs L.++ (RI ev L.++ R t2)  ↭⟨ {!   !} ⟩
+    RU* evs L.++ (RU ev L.++ R t3)  ↭⟨ {!   !} ⟩
+    (RU* evs L.++ RU ev) L.++ R t3 ∎
