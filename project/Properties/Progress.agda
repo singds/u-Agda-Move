@@ -9,14 +9,17 @@ module project.Properties.Progress
 
 open import project.Properties.Include P
 
+private
+    variable
+        M   : Fin Nm
+        t   : Term
+        T   : Type
+
 progress :
-    {M : Fin Nm}
-    {t : Term} {T : Type}
-    → HasType M [] t T []
+      HasType M [] t T []
     → (Value t) ⊎ (P.∃ λ t' → M ∋ t ⇒ t')
 
 progress-vec :
-    {M : Fin Nm}
     {n : ℕ} {ts : Vec Term n} {Ts : Vec Type n}
     → HasTypeV M [] ts Ts []
     → (ValueV ts) ⊎ (P.∃ λ ts' → M ∋ ts ⇒v ts')
