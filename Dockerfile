@@ -1,6 +1,7 @@
 
 from ubuntu:22.04
 
+SHELL ["/bin/bash", "-c"]
 
 run apt upgrade \
  && apt -y update \
@@ -25,3 +26,5 @@ run cd ~/.agda \
   && cd ~/.agda/ \
   && echo -e "~/.agda/agda-stdlib/standard-library.agda-lib\n" > libraries \
   && echo -e "standard-library\n" > defaults
+
+ENV PATH="${PATH}:/root/.cabal/bin"
