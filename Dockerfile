@@ -1,9 +1,15 @@
 
-from ubuntu:22.04
+FROM ubuntu:22.04
 
 SHELL ["/bin/bash", "-c"]
 
-run apt upgrade \
+ARG userID
+ARG groupID
+
+RUN if [ -z "${userID}" ];  then echo "ERROR: userID not set" >&2;  exit 1; fi
+RUN if [ -z "${groupID}" ]; then echo "ERROR: groupID not set" >&2; exit 1; fi
+
+RUN apt upgrade \
  && apt -y update \
  && apt -y install \
     ghc \
@@ -13,18 +19,24 @@ run apt upgrade \
     alex \
     pkg-config \
     zlib1g-dev \
-    git \
-  && cabal update \
+    git
+
+RUN groupadd -g ${groupID} agda
+RUN useradd -m -u ${userID} -g agda --shell /bin/bash agda
+
+USER agda:agda
+
+RUN cabal update \
   && cabal install Agda-2.6.4
 
 # install agda-stdlib
-run mkdir ~/.agda
-run cd ~/.agda \
+RUN mkdir $HOME/.agda
+RUN cd $HOME/.agda \
   && git clone https://github.com/agda/agda-stdlib.git \
-  && cd ~/.agda/agda-stdlib \
+  && cd $HOME/.agda/agda-stdlib \
   && git checkout v1.7.3 \
-  && cd ~/.agda/ \
+  && cd $HOME/.agda/ \
   && echo -e "~/.agda/agda-stdlib/standard-library.agda-lib\n" > libraries \
   && echo -e "standard-library\n" > defaults
 
-ENV PATH="${PATH}:/root/.cabal/bin"
+ENV PATH="${PATH}:/home/agda/.cabal/bin"
