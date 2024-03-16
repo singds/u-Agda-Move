@@ -3,12 +3,15 @@
 
 
 # Project structure
-- `project` contains the Agda source files.  
-    The is considered successfully built when all the files in this directory are type-checked by `agda`.
-- `Makefile` defines the command to create the docker image and run a container to build the project.
-- `Dockerfile` image recipe.
-- `run-in-container.sh` the script that is executed inside the container.  
+- `project`: contains the Agda source files.  
+    The project is considered successfully built when all the files in this directory are type-checked by `agda`.
+- `Makefile`: defines the command to create the docker image and run a container to build the project.
+- `Dockerfile`: image recipe.
+- `run-in-container.sh`: the script that is executed inside the container.  
     It type-checks all the `.agda` files of the project.
+- `result.txt`: the output of the type-checking process.  
+    It contains a line for each compiled file.
+    Success if all the lines start with `[OK]`.
 
 
 # Overview
