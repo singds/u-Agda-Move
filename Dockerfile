@@ -11,7 +11,7 @@ RUN if [ -z "${groupID}" ]; then echo "ERROR: groupID not set" >&2; exit 1; fi
 
 RUN apt upgrade \
  && apt -y update \
- && apt -y install \
+ && apt -y install --no-install-recommends \
     ghc \
     cabal-install \
     emacs \
@@ -19,7 +19,9 @@ RUN apt upgrade \
     alex \
     pkg-config \
     zlib1g-dev \
-    git
+    git \
+    ssh \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd -g ${groupID} agda
 RUN useradd -m -u ${userID} -g agda --shell /bin/bash agda
@@ -32,6 +34,7 @@ RUN cabal update \
 # install agda-stdlib
 RUN mkdir $HOME/.agda
 RUN cd $HOME/.agda \
+  && git config --global http.sslVerify false \
   && git clone https://github.com/agda/agda-stdlib.git \
   && cd $HOME/.agda/agda-stdlib \
   && git checkout v1.7.3 \
