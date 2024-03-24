@@ -27,7 +27,7 @@ typing judgement, the input and output env., and we still get a valid typing jud
     Γ1 → Γ3      we change the env.s.
     Γ2 → Γ3
 -}
-value-type :
+value-type :disdpod
       Value t
     → HasType M1 Γ1 t T Γ2
     → HasType M2 Γ t T Γ
